@@ -7,3 +7,5 @@ How-to:
 1. Make sure you have [yarn](https://yarnpkg.com) installed
 2. `$ yarn && yarn run build`
 3. Navigate to `/build` and open `index.html`
+
+...or [click here](https://rkrupinski.github.io/elm-snake/).
