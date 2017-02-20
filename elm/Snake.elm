@@ -55,6 +55,10 @@ snakeLength : Int
 snakeLength =
   3
 
+tickInterval : Time
+tickInterval =
+  200 * millisecond
+
 newSnake : Snake
 newSnake =
   let
@@ -325,7 +329,7 @@ subscriptions model =
       ]
 
     playingSubs =
-      [ Time.every (400 * millisecond) Tick
+      [ Time.every tickInterval Tick
       , turns Turn
       ]
   in
