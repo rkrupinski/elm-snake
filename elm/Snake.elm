@@ -69,7 +69,8 @@ newSnake =
       |> List.map (\x -> (x, center))
 
 initialSpeed : Speed
-initialSpeed = (-1, 0)
+initialSpeed =
+  (-1, 0)
 
 level : Level
 level =
@@ -268,7 +269,7 @@ renderCell cell =
     bg =
       case cell of
         Empty ->
-          "cornsilk"
+          "transparent"
         Segment ->
           "darkgreen"
         Food ->
@@ -299,6 +300,7 @@ renderLevel snake food =
           , ("overflow", "hidden")
           , ("border", "1px solid black")
           , ("margin-bottom", "1em")
+          , ("background", "cornsilk")
           ]
       ]
       (List.map renderCell cells)
