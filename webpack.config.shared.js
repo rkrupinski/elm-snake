@@ -28,6 +28,7 @@ module.exports = {
       },
       {
         test: /\.elm/,
+        exclude: /elm-stuff/,
         use: [
           {
             loader: 'elm-webpack-loader',
