@@ -6,13 +6,9 @@ import Time exposing (Time, millisecond)
 import Random exposing (generate, int)
 
 type alias Coords = (Int, Int)
-
 type alias Speed = Coords
-
 type alias Food = Coords
-
 type alias Level = List Coords
-
 type alias Snake = List Coords
 
 type Cell
@@ -32,6 +28,7 @@ type alias Model =
   , speed : Speed
   , nextSpeed : Maybe Speed
   , food : Maybe Food
+  , foodTicks : Int
   }
 
 main : Program Never Model Msg
@@ -59,9 +56,14 @@ tickInterval : Time
 tickInterval =
   200 * millisecond
 
+foodLifetime : Int
+foodLifetime =
+  25
+
 newSnake : Snake
 newSnake =
   let
+    center : Int
     center =
       levelSize // 2
   in
@@ -75,6 +77,7 @@ initialSpeed =
 level : Level
 level =
   let
+    indexes : List Int
     indexes =
       List.range 0 (levelSize^2 - 1)
   in
@@ -82,11 +85,12 @@ level =
 
 init : Bool -> (Model, Cmd Msg)
 init playing =
-  Model playing newSnake initialSpeed Nothing Nothing ! []
+  Model playing newSnake initialSpeed Nothing Nothing 0 ! []
 
 move : Snake -> Speed -> Maybe Food -> (Snake, Bool)
 move snake (sX, sY) food =
   let
+    snakeHead : Coords
     snakeHead =
       case List.head snake of
         Just (hX, hY) ->
@@ -94,6 +98,7 @@ move snake (sX, sY) food =
         Nothing ->
           (0, 0)
 
+    dropSegments : Int
     dropSegments =
       case food of
         Just val ->
@@ -111,9 +116,11 @@ move snake (sX, sY) food =
 collides : Snake -> Bool
 collides snake =
   let
+    snakeHead : Maybe Coords
     snakeHead =
       List.head snake
 
+    snakeTail : Maybe (List Coords)
     snakeTail =
       List.tail snake
   in
@@ -131,17 +138,29 @@ collides snake =
       _ ->
         False
 
+feedCmd : Snake -> Cmd Msg
+feedCmd snake =
+  let
+    snakeSize: Int
+    snakeSize =
+      List.length snake
+  in
+    generate Feed <| int 0 <| levelSize^2 - snakeSize
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Tick _ ->
       let
+        hit : Bool
         hit =
           collides snake
 
+        playing : Bool
         playing =
           model.playing && not hit
 
+        speed : Speed
         speed =
           case model.nextSpeed of
             Just val ->
@@ -152,9 +171,11 @@ update msg model =
         (snake, hasEaten) =
           move model.snake speed model.food
 
+        nextSpeed : Maybe Speed
         nextSpeed =
           Nothing
 
+        food : Maybe Food
         food =
           case hasEaten of
             True ->
@@ -162,21 +183,31 @@ update msg model =
             False ->
               model.food
 
+        rottenFood : Bool
+        rottenFood =
+          model.foodTicks == foodLifetime
+
+        foodTicks : Int
+        foodTicks =
+          if hasEaten || rottenFood then
+            0
+          else
+            model.foodTicks + 1
+
+        foodCmds : List (Cmd Msg)
         foodCmds =
           case food of
             Nothing ->
-              let
-                levelSize =
-                  List.length level
-
-                snakeSize =
-                  List.length snake
-              in
-                [ generate Feed <| int 0 <| levelSize - snakeSize
-                ]
+              [ feedCmd snake
+              ]
             _ ->
-              []
+              if rottenFood then
+                [ feedCmd snake
+                ]
+              else
+                []
 
+        scoreCmds : List (Cmd Msg)
         scoreCmds =
           case hasEaten of
             True ->
@@ -185,6 +216,7 @@ update msg model =
             False ->
               []
 
+        cmds : List (Cmd Msg)
         cmds =
           case (hit, playing) of
             (True, False) ->
@@ -195,7 +227,7 @@ update msg model =
                 |> List.append foodCmds
                 |> List.append scoreCmds
       in
-        Model playing snake speed nextSpeed food ! cmds
+        Model playing snake speed nextSpeed food foodTicks ! cmds
 
     Command cmd ->
       case cmd of
@@ -226,15 +258,19 @@ update msg model =
 
     Feed index ->
       let
+        snake : Snake
         snake =
           model.snake
 
+        filterFn : Coords -> Bool
         filterFn c =
           not (List.member c snake)
 
+        emptyCells : List Coords
         emptyCells =
           List.filter filterFn level
 
+        foodCell : Maybe Coords
         foodCell =
           emptyCells
             |> List.drop (index - 1)
@@ -249,6 +285,7 @@ update msg model =
 formatCell : Snake -> Maybe Food -> Coords -> Cell
 formatCell snake food coords =
   let
+    foodCell : Coords
     foodCell =
       case food of
         Just val ->
@@ -266,6 +303,7 @@ formatCell snake food coords =
 renderCell : Cell -> Html msg
 renderCell cell =
   let
+    bg : String
     bg =
       case cell of
         Empty ->
@@ -288,9 +326,11 @@ renderCell cell =
 renderLevel : Snake -> Maybe Food -> Html msg
 renderLevel snake food =
   let
+    mapFn : Coords -> Cell
     mapFn =
       formatCell snake food
 
+    cells : List Cell
     cells =
       List.map mapFn level
   in
@@ -326,10 +366,12 @@ subscriptions model =
     { playing } =
       model
 
+    defaultSubs : List (Sub Msg)
     defaultSubs =
       [ control Command
       ]
 
+    playingSubs : List (Sub Msg)
     playingSubs =
       [ Time.every tickInterval Tick
       , turns Turn
