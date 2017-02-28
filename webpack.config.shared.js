@@ -1,11 +1,24 @@
 const path = require('path');
+const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: path.resolve(__dirname, 'src', 'index.jsx'),
+  entry: {
+    main: path.resolve(__dirname, 'src', 'index.jsx'),
+    vendor: [
+      'regenerator-runtime/runtime',
+      'react',
+      'react-dom',
+      'react-elm-components',
+      'react-redux',
+      'recompose',
+      'redux',
+      'redux-saga',
+    ],
+  },
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'snake.[hash:6].js',
+    filename: '[chunkhash].[name].js',
   },
   resolve: {
     extensions: ['.js', '.jsx', '.elm'],
@@ -39,5 +52,11 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(['build']),
+     new webpack.optimize.CommonsChunkPlugin({
+      names: [
+        'vendor',
+        'manifest',
+      ],
+    }),
   ],
 };

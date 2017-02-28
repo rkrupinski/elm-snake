@@ -7,10 +7,10 @@ import withHandlers from 'recompose/withHandlers';
 import setPropTypes from 'recompose/setPropTypes';
 
 import { Snake } from 'Snake';
-import { beep } from '../sounds';
-import { KEY_MAP } from '../constants';
+import { KEY_MAP, GAME_OVER, SCORE } from '../constants';
 import setPorts from '../actionCreators/setPorts';
 import gameOver from '../actionCreators/gameOver';
+import score from '../actionCreators/score';
 import NewGameBtn from './newGameBtn';
 
 
@@ -41,10 +41,10 @@ export default compose(
 
         ports.gameplay.subscribe(type => {
           switch (type) {
-            case 'GAME_OVER':
+            case GAME_OVER:
               return dispatch(gameOver());
-            case 'SCORE':
-              return beep();
+            case SCORE:
+              return dispatch(score());
           }
         });
       },
