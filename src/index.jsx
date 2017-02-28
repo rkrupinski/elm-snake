@@ -5,7 +5,7 @@ import Root from 'components/root';
 
 try {
   if (process.env.NODE_ENV === 'production') {
-    navigator.serviceWorker.register('/service-worker.js');
+    navigator.serviceWorker.register('service-worker.js');
   }
 } catch (err) {}
 
