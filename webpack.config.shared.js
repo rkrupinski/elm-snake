@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -52,11 +53,12 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(['build']),
-     new webpack.optimize.CommonsChunkPlugin({
+    new webpack.optimize.CommonsChunkPlugin({
       names: [
         'vendor',
         'manifest',
       ],
     }),
+    new SWPrecacheWebpackPlugin(),
   ],
 };
