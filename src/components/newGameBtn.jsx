@@ -20,21 +20,12 @@ export default compose(
     renderNothing
   ),
   connect(
-    ({ ports }) => ({
-      ports,
-    }),
-    (dispatch) => ({
-      dispatch,
-    }),
-    ({ ports }, { dispatch }, ownProps) => ({
-      ...ownProps,
-      newGame() {
-        dispatch(newGame(ports));
-      },
-    })
+    null,
+    {
+      newGame,
+    }
   ),
   setPropTypes({
-    newGame: PropTypes.func.isRequired,
     playing: PropTypes.bool.isRequired,
   })
 )(NewGameBtn);
