@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import compose from 'recompose/compose';
 import branch from 'recompose/branch';
-import renderComponent from 'recompose/renderComponent';
 import renderNothing from 'recompose/renderNothing';
 import setPropTypes from 'recompose/setPropTypes';
 
@@ -27,5 +26,6 @@ export default compose(
   ),
   setPropTypes({
     playing: PropTypes.bool.isRequired,
+    newGame: PropTypes.func.isRequired,
   })
 )(NewGameBtn);
