@@ -164,14 +164,10 @@ collides snake =
                         sHead
                 in
                     List.member sHead sTail
-                        || x
-                        < 0
-                        || x
-                        >= levelSize
-                        || y
-                        < 0
-                        || y
-                        >= levelSize
+                    || x < 0
+                    || x >= levelSize
+                    || y < 0
+                    || y >= levelSize
 
             _ ->
                 False
